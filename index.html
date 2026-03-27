@@ -1,0 +1,137 @@
+import { useState } from "react";
+ 
+const COLORS = {
+  navy: "#0B1929",
+  navyMid: "#112236",
+  navyLight: "#1A3352",
+  amber: "#E8A020",
+  amberLight: "#F5C060",
+  steel: "#8AA4BE",
+  steelLight: "#B8CEDE",
+  white: "#F0F4F8",
+  success: "#2ECC8A",
+  danger: "#E85050",
+  warning: "#F0A030",
+  info: "#4090D0",
+};
+ 
+const STAGES = ["Lead", "Qualified", "Proposal", "Contracted", "Application Review", "Stage 1 Audit", "Stage 2 Audit", "NCR Review", "Technical Review", "Cert Decision", "Certified", "Surveillance"];
+ 
+const LEADS = [
+  { id: 1, company: "Axiom Manufacturing GmbH", contact: "Klaus Weber", email: "k.weber@axiom.de", phone: "+49 221 4455", standard: "ISO 9001:2015", stage: "Lead", owner: "Sarah Mitchell", value: 12400, country: "Germany", date: "2026-03-10", priority: "High", notes: "Large automotive supplier, 3 sites" },
+  { id: 2, company: "TechPrime Solutions Ltd", contact: "Priya Mehta", email: "p.mehta@techprime.uk", phone: "+44 20 7123", standard: "ISO 27001:2022", stage: "Qualified", owner: "James O'Brien", value: 18750, country: "UK", date: "2026-03-05", priority: "High", notes: "SaaS company, data protection focus" },
+  { id: 3, company: "EcoFlex Packaging", contact: "Marie Dupont", email: "m.dupont@ecoflex.fr", phone: "+33 1 5544", standard: "ISO 14001:2015", stage: "Proposal", owner: "Sarah Mitchell", value: 9200, country: "France", date: "2026-02-28", priority: "Medium", notes: "Sustainable packaging, ESG goals" },
+  { id: 4, company: "Delta Pharma AG", contact: "Hans Richter", email: "h.richter@deltapharma.de", phone: "+49 89 3322", standard: "ISO 13485:2016", stage: "Contracted", owner: "Ahmad Hassan", value: 34000, country: "Germany", date: "2026-02-15", priority: "Critical", notes: "Medical device manufacturer, FDA requirements" },
+  { id: 5, company: "LogiChain Europe", contact: "Elena Rossi", email: "e.rossi@logichain.eu", phone: "+39 02 9988", standard: "ISO 45001:2018", stage: "Stage 1 Audit", owner: "James O'Brien", value: 11600, country: "Italy", date: "2026-01-20", priority: "Medium", notes: "Logistics company, 5 warehouses" },
+  { id: 6, company: "AeroParts Iberia", contact: "Carlos Vega", email: "c.vega@aeroparts.es", phone: "+34 91 2211", standard: "AS9100 Rev D", stage: "Stage 2 Audit", owner: "Ahmad Hassan", value: 28000, country: "Spain", date: "2026-01-08", priority: "Critical", notes: "Aerospace components, Tier 1 supplier" },
+  { id: 7, company: "SmartGrid Nordic", contact: "Ingrid Larsen", email: "i.larsen@smartgrid.no", phone: "+47 22 4433", standard: "ISO 50001:2018", stage: "NCR Review", owner: "Sarah Mitchell", value: 15500, country: "Norway", date: "2025-12-10", priority: "High", notes: "Energy management, 2 NCRs outstanding" },
+  { id: 8, company: "BioMed Czech", contact: "Pavel Novak", email: "p.novak@biomed.cz", phone: "+420 2 3344", standard: "ISO 15189:2022", stage: "Technical Review", owner: "Ahmad Hassan", value: 22000, country: "Czech Republic", date: "2025-11-25", priority: "High", notes: "Medical laboratory, accreditation scope" },
+  { id: 9, company: "Helios Solar Group", contact: "Yiannis Papadopoulos", email: "y.papa@helios.gr", phone: "+30 21 0055", standard: "ISO 9001:2015", stage: "Cert Decision", owner: "James O'Brien", value: 8900, country: "Greece", date: "2025-11-10", priority: "Medium", notes: "Solar panel installation, positive review" },
+  { id: 10, company: "PureTech Filtration", contact: "Anna Schmidt", email: "a.schmidt@puretech.de", phone: "+49 40 7788", standard: "ISO 14001:2015", stage: "Certified", owner: "Sarah Mitchell", value: 10200, country: "Germany", date: "2025-10-05", priority: "Low", notes: "Cert issued, first surveillance due Q4" },
+];
+ 
+const AUDITORS = [
+  { id: 1, name: "Dr. Markus Braun", standards: ["ISO 9001", "AS9100", "IATF 16949"], availability: "Available", audits: 3, location: "Munich" },
+  { id: 2, name: "Claire Thompson", standards: ["ISO 27001", "ISO 22301", "SOC 2"], availability: "Busy", audits: 5, location: "London" },
+  { id: 3, name: "Farhan Al-Rashid", standards: ["ISO 13485", "ISO 15189", "GMP"], availability: "Available", audits: 2, location: "Dubai" },
+  { id: 4, name: "Lucia Ferrari", standards: ["ISO 14001", "ISO 50001", "EMAS"], availability: "Leave", audits: 0, location: "Milan" },
+  { id: 5, name: "Björn Eriksson", standards: ["ISO 45001", "ISO 9001", "OHSAS"], availability: "Available", audits: 4, location: "Stockholm" },
+];
+ 
+const CERTIFICATES = [
+  { id: "CERT-2025-0892", company: "PureTech Filtration", standard: "ISO 14001:2015", issued: "2025-10-05", expiry: "2028-10-04", scope: "Design, manufacture and supply of industrial filtration systems", status: "Active", auditor: "Lucia Ferrari", nextSurveillance: "2026-10-05" },
+  { id: "CERT-2025-0741", company: "Rheingold Foods AG", standard: "ISO 22000:2018", issued: "2025-07-12", expiry: "2028-07-11", scope: "Food processing and packaging of dairy products", status: "Active", auditor: "Dr. Markus Braun", nextSurveillance: "2026-07-12" },
+  { id: "CERT-2024-0512", company: "NordBau Konstruktion", standard: "ISO 9001:2015", issued: "2024-11-30", expiry: "2027-11-29", scope: "Construction management and civil engineering projects", status: "Active", auditor: "Björn Eriksson", nextSurveillance: "2025-11-30" },
+  { id: "CERT-2024-0388", company: "MedTech Bavaria", standard: "ISO 13485:2016", issued: "2024-08-15", expiry: "2027-08-14", scope: "Development and manufacture of surgical instruments", status: "Suspended", auditor: "Farhan Al-Rashid", nextSurveillance: "2025-08-15" },
+];
+ 
+const UPCOMING_AUDITS = [
+  { id: "AUD-2026-0145", company: "AeroParts Iberia", type: "Stage 2", standard: "AS9100 Rev D", auditor: "Dr. Markus Braun", date: "2026-04-02", duration: "3 days", location: "Madrid, Spain", status: "Confirmed" },
+  { id: "AUD-2026-0146", company: "SmartGrid Nordic", type: "NCR Follow-up", standard: "ISO 50001:2018", auditor: "Björn Eriksson", date: "2026-04-08", duration: "1 day", location: "Oslo, Norway", status: "Confirmed" },
+  { id: "AUD-2026-0147", company: "LogiChain Europe", type: "Stage 2", standard: "ISO 45001:2018", auditor: "Björn Eriksson", date: "2026-04-15", duration: "4 days", location: "Turin, Italy", status: "Pending" },
+  { id: "AUD-2026-0148", company: "TechPrime Solutions Ltd", type: "Stage 1", standard: "ISO 27001:2022", auditor: "Claire Thompson", date: "2026-04-22", duration: "2 days", location: "Remote", status: "Scheduled" },
+];
+ 
+const NCR_DATA = [
+  { id: "NCR-2026-0042", company: "SmartGrid Nordic", clause: "Clause 9.1 – Performance Evaluation", severity: "Major", description: "No documented procedure for monitoring and measuring energy performance indicators against baseline.", raised: "2026-02-18", due: "2026-04-18", status: "In Progress", auditor: "Björn Eriksson" },
+  { id: "NCR-2026-0043", company: "SmartGrid Nordic", clause: "Clause 8.4 – Operational Planning", severity: "Minor", description: "Energy action plans lack quantifiable targets for 2 of 5 identified significant energy uses.", raised: "2026-02-18", due: "2026-04-18", status: "Evidence Submitted", auditor: "Björn Eriksson" },
+  { id: "NCR-2026-0038", company: "AeroParts Iberia", clause: "Clause 7.5 – Documented Information", severity: "Major", description: "Configuration management records for Lot 2024-AE-112 missing revision history.", raised: "2026-01-30", due: "2026-03-30", status: "Overdue", auditor: "Dr. Markus Braun" },
+];
+ 
+const navItems = [
+  { id: "dashboard", label: "Dashboard", icon: "⬛" },
+  { id: "pipeline", label: "Sales Pipeline", icon: "◈" },
+  { id: "applications", label: "Applications", icon: "◉" },
+  { id: "audit-planning", label: "Audit Planning", icon: "▦" },
+  { id: "ncr", label: "NCR Tracker", icon: "⚠" },
+  { id: "certificates", label: "Certificates", icon: "◆" },
+  { id: "auditors", label: "Auditor Pool", icon: "▣" },
+];
+ 
+const stageColors = {
+  "Lead": "#4090D0",
+  "Qualified": "#5BA0E0",
+  "Proposal": "#7080D0",
+  "Contracted": "#9070C0",
+  "Application Review": "#B060A0",
+  "Stage 1 Audit": "#E8A020",
+  "Stage 2 Audit": "#E07010",
+  "NCR Review": "#E05040",
+  "Technical Review": "#D04040",
+  "Cert Decision": "#20B080",
+  "Certified": "#10A060",
+  "Surveillance": "#2ECC8A",
+};
+ 
+const priorityColor = { Critical: "#E85050", High: "#E8A020", Medium: "#4090D0", Low: "#8AA4BE" };
+ 
+export default function CertCRM() {
+  const [activeNav, setActiveNav] = useState("dashboard");
+  const [selectedLead, setSelectedLead] = useState(null);
+  const [pipelineView, setPipelineView] = useState("kanban");
+  const [filterStage, setFilterStage] = useState("All");
+ 
+  const stageGroups = STAGES.reduce((acc, s) => {
+    acc[s] = LEADS.filter(l => l.stage === s);
+    return acc;
+  }, {});
+ 
+  const totalPipelineValue = LEADS.reduce((s, l) => s + l.value, 0);
+  const activeCerts = CERTIFICATES.filter(c => c.status === "Active").length;
+  const openNCRs = NCR_DATA.filter(n => n.status !== "Closed").length;
+ 
+  return (
+    <div style={{ fontFamily: "'IBM Plex Sans', 'Segoe UI', sans-serif", background: COLORS.navy, minHeight: "100vh", display: "flex", color: COLORS.white }}>
+      {/* SIDEBAR */}
+      <div style={{ width: 220, background: COLORS.navyMid, borderRight: `1px solid ${COLORS.navyLight}`, display: "flex", flexDirection: "column", flexShrink: 0 }}>
+        {/* Logo */}
+        <div style={{ padding: "20px 18px 14px", borderBottom: `1px solid ${COLORS.navyLight}` }}>
+          <div style={{ fontSize: 11, letterSpacing: 4, color: COLORS.amber, fontWeight: 700, textTransform: "uppercase", marginBottom: 2 }}>CertFlow</div>
+          <div style={{ fontSize: 10, color: COLORS.steel, letterSpacing: 1 }}>CERTIFICATION CRM</div>
+        </div>
+ 
+        {/* Nav */}
+        <nav style={{ flex: 1, padding: "10px 0" }}>
+          {navItems.map(item => (
+            <button key={item.id} onClick={() => setActiveNav(item.id)}
+              style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "10px 18px", background: activeNav === item.id ? COLORS.navyLight : "transparent", border: "none", color: activeNav === item.id ? COLORS.amber : COLORS.steel, cursor: "pointer", fontSize: 12, fontWeight: activeNav === item.id ? 600 : 400, textAlign: "left", borderLeft: activeNav === item.id ? `3px solid ${COLORS.amber}` : "3px solid transparent", transition: "all 0.15s" }}>
+              <span style={{ fontSize: 14 }}>{item.icon}</span>
+              {item.label}
+            </button>
+          ))}
+        </nav>
+ 
+        {/* User */}
+        <div style={{ padding: "14px 18px", borderTop: `1px solid ${COLORS.navyLight}`, display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ width: 32, height: 32, borderRadius: "50%", background: COLORS.amber, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, color: COLORS.navy }}>SM</div>
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 600, color: COLORS.white }}>Sarah Mitchell</div>
+            <div style={{ fontSize: 10, color: COLORS.steel }}>Senior Sales</div>
+          </div>
+        </div>
+      </div>
+ 
+      {/* MAIN */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+        {/* Topbar */}
+        <div style={{ heig
